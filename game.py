@@ -89,7 +89,30 @@ def load_high_score():
             high_score = json.load(file)
     except FileNotFoundError:
         high_score = 0
+def save_high_score():
+    global high_score
+    if score > high_score:
+        high_score = score
 
+        # Kết nối tới cơ sở dữ liệu
+        db = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="",
+            database="game_data"
+        )
+
+        # Tạo bảng high_scores nếu chưa tồn tại
+        cursor = db.cursor()
+        cursor.execute("CREATE TABLE IF NOT EXISTS high_scores (score INT)")
+
+        # Lưu điểm cao vào cơ sở dữ liệu
+        cursor.execute("INSERT INTO high_scores (score) VALUES (%s)", (high_score,))
+        db.commit()
+
+        # Đóng kết nối
+        cursor.close()
+        db.close()
 def reset_game():
     global bird_y, score, pipe_x, pipe1_y, pipe2_y, game_over
     bird_y = HEIGHT // 2 - bird_height // 2
